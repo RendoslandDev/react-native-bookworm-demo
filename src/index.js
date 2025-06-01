@@ -4,9 +4,13 @@ import authRoutes from './routes/authRoute.js';
 import { connectDB } from './lib/db.js';
 import cors from 'cors';
 import bookRouter from './routes/bookRoutes.js';
+import job from './lib/cron.js';
 
 const app = express();
 const PORT = process.env.PORT || 3002;
+
+
+job.start();
 
 app.use("/api/auth",authRoutes)
 app.use("/api/books",bookRouter);
