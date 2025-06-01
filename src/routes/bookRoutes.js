@@ -2,7 +2,7 @@ import express from 'express';
 import cloudinary from '../lib/cloudinary.js';
 import protectedRoute from '../middleware/auth.js';
 const router = express.Router();
-import Book from '../models/book.js'; // Assuming you have a Book model defined
+import Book from '../models/book.js';
 
 router.post('/',protectedRoute, async(req, res) => {
    try {
