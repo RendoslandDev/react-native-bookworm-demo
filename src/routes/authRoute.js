@@ -44,8 +44,8 @@ router.post('/register', async(req, res) => {
         });
 
 
-        await user.save();
-        res.status(201).json({ message: 'User registered successfully' });
+        // await user.save();
+        // res.status(201).json({ message: 'User registered successfully' });
 
 
 const token = generateToken(user._id);
