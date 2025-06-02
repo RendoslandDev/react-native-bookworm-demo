@@ -64,6 +64,8 @@ const token = generateToken(user._id);
             profileImage: user.profileImage,
         }
     });
+    console.log('Request Body:', req.body); // Check if data is received
+console.log('User Before Save:', user); // Check if user object is valid
     } catch (error) {
 
         console.error('Error registering user:', error);
