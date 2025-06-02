@@ -7,8 +7,6 @@ const router = express.Router();
 
 
 
-const app = express();
-app.use(express.json());
 
 const generateToken = (userId) => {
     return jwt.sign({ id: userId }, process.env.JWT_SECRET, { expiresIn: '15d' });
@@ -51,7 +49,7 @@ router.post('/register', async(req, res) => {
         });
 
 
-        // await user.save();
+        await user.save();
         // res.status(201).json({ message: 'User registered successfully' });
 
 
