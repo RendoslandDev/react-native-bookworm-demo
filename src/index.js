@@ -21,4 +21,4 @@ app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
     connectDB();
     });
-    app.use(cors());
+app.use(cors());
