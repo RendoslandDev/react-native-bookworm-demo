@@ -1,6 +1,10 @@
 import jwt from "jsonwebtoken";
 import User from "../models/User.js"
+import express from 'express'
 
+
+const app = express();
+app.use(express.json());
 
 
 const protectedRoute = async(req, res,next) =>{
