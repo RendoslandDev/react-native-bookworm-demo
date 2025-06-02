@@ -10,7 +10,7 @@ const app = express();
 const PORT = process.env.PORT || 3002;
 
 
-job.start();
+ job.start();
 
 app.use("/api/auth",authRoutes)
 app.use("/api/books",bookRouter);

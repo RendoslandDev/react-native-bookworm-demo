@@ -19,9 +19,6 @@ router.post('/register', async(req, res) => {
             return res.status(400).json({ message: 'Password must be at least 6 characters long' });
 
         }
-        if (username.length <  3) {
-            return res.status(400).json({ message: 'Invalid email address' });
-        }
         if(username.length < 3) {
             return res.status(400).json({ message: 'Username must be at least 3 characters long' });
         }
