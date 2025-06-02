@@ -6,17 +6,14 @@ import Book from '../models/book.js';
 
 router.post('/',protectedRoute, async(req, res) => {
    try {
-    const {title , caption, image, rating, user} = req.body;
-    if (!title || !caption || !image || !rating || !user) {
+    const {title , caption, image, rating} = req.body;
+    if (!title || !caption || !image || !rating ) {
         return res.status(400).json({ message: 'All fields are required' });
     }
 
-   const uploadResponse = await cloudinary.uploader.upload(image, {
-        folder: 'book_images',
-        allowed_formats: ['jpg', 'png', 'jpeg'],
-    });
+   const uploadResponse = await cloudinary.uploader.upload(image);
     const imageUrl = uploadResponse.secure_url;
-    const imagePublicId = uploadResponse.public_id;
+
 
     const newBook = new Book({
         title,
@@ -42,19 +39,26 @@ router.post('/',protectedRoute, async(req, res) => {
 
 // const response =  await fetch("http://localhost:3002/api/books?page=3&limit=5");
 
-router.get('/:id', protectedRoute, async (req, res) => {
+router.get('/', protectedRoute, async (req, res) => {
     try {
+        const page = req.query.page || 1;
+        const limit = req.query.limit || 5 ;
+        const skip = (page-1) * limit
 
-const page = req.query.page || 1;
-const limit = req.query.limit || 5;
+const books = await Book.find()
+.sort({createdAt: -1})
+.skip(skip)
+.limit(limit)
+.populate("user", "username profileImage")
 
- const books = await Book.find().sort({ createdAt: -1 }).skip(skip).limit(limit).populate('user', 'username profileImage').exec();
- res.send({
+
+   const totalBooks = await Book.countDocuments();
+res.send({
     books,
-    currentPage: page,
-    totalPages: Math.ceil(await Book.countDocuments() / limit),
-    totalBooks: await Book.countDocuments(),
- });
+    currentPage:page,
+    totalBooks:Math.ceil(totalBooks / limit)
+});
+
     } catch (error) {
 
         console.error('Error fetching book:', error);
@@ -77,30 +81,13 @@ router.get('/user', protectedRoute, async (req, res) => {
 
 delete router.delete('/:id', protectedRoute, async (req, res) => {
     try {
-        const bookId = req.params.id;
-        const book = await Book.findById(bookId);
-        if (!book) {
-            return res.status(404).json({ message: 'Book not found' });
-        }
-        if (book.user.toString() !== req.user._id.toString()) {
-            return res.status(401).json({ message: 'You are not authorized to delete this book' });
-        }
-        if(book.image && book.image.includes('cloudinary')) {
-            try {
-                const publicId = book.image.split('/').pop().split('.')[0];
-                await cloudinary.uploader.destroy(publicId);
-            } catch (error) {
+        const book = await Book.findById(req.params.id);
+        if(!book) return res.status(404).json({message:"Book not found"})
+            if(book.user.toString() !== req.user._id.toString())
+                return res.status(401).json({message:Unauthorized})
 
-                console.error('Error deleting image from Cloudinary:', error);
-                return res.status(500).json({ message: 'Failed to delete image from Cloudinary' });
-            }
-            // await cloudinary.uploader.destroy(book.imagePublicId);
-        }
-
-
-
-        await Book.findByIdAndDelete(bookId);
-        res.status(200).json({ message: 'Book deleted successfully' });
+        await book.deleteOne();
+        res.json({message:"Book deleted successsfully"})
     } catch (error) {
         console.error('Error deleting book:', error);
         res.status(500).json({ message: 'Internal server error' });

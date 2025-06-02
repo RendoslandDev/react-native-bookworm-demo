@@ -4,16 +4,13 @@ import User from '../models/User.js';
 const router = express.Router();
 
 const generateToken = (userId) => {
-    // Implement your token generation logic here
-    // For example, using JWT:
     return jwt.sign({ id: userId }, process.env.JWT_SECRET, { expiresIn: '15d' });
-    // Placeholder for demonstration
 };
 
 
-router.get('/register', async(req, res) => {
+router.post('/register', async(req, res) => {
     try {
-        const {email, username, password } = req.query;
+        const {email, username, password } = req.body;
         if (!username ||!email || !password) {
             return res.status(400).json({ message: 'Username and password are required' });
         }
@@ -22,18 +19,14 @@ router.get('/register', async(req, res) => {
             return res.status(400).json({ message: 'Password must be at least 6 characters long' });
 
         }
-        if (!email.includes('@')) {
+        if (username.length <  3) {
             return res.status(400).json({ message: 'Invalid email address' });
         }
         if(username.length < 3) {
             return res.status(400).json({ message: 'Username must be at least 3 characters long' });
         }
 
-    //    const existingUser = await User.findOne({ $or:[{email}]});
-        // if (existingUser) {
-        //     return res.status(400).json({ message: 'User already exists' });
-        // }
-
+    await User.findOne({$or:[{email}, {username}]})
         const existingEmail = await User.findOne({ email });
         if (existingEmail) {
             return res.status(400).json({ message: 'Email already registered' });
@@ -46,7 +39,7 @@ router.get('/register', async(req, res) => {
 
         const profileImage = `https://api.dicebear.com/7.x/avataars/svg?seed=${username}`; // Default profile image URL
 
-        const newUser = new User({
+        const user = new User({
             username,
             email,
             password,
@@ -54,18 +47,20 @@ router.get('/register', async(req, res) => {
         });
 
 
-        await newUser.save();
+        await user.save();
         res.status(201).json({ message: 'User registered successfully' });
 
 
-const token = generateToken(newUser._id);
+const token = generateToken(user._id);
 
     res.status(201).json({
-        _id: newUser._id,
-        username: newUser.username,
-        email: newUser.email,
-        profileImage: newUser.profileImage,
         token,
+        user:{
+            _id: user._id,
+            username: user.username,
+            email: user.email,
+            profileImage: user.profileImage,
+        }
     });
     } catch (error) {
 

@@ -27,11 +27,11 @@ const userSchema = new mongoose.Schema({
 },{timestamps: true});
 
 userSchema.pre("save", function (next) {
-    if (this.isModified("password")) {
+    if (this.isModified("password")) return next();
         const salt = bcrypt.genSaltSync(100);
         // Hash the password before saving
         this.password = bcrypt.hashSync(this.password, salt);
-    }
+
     next();
 });
 
